@@ -1,3 +1,11 @@
+### FlowChart
+ FlowChart (https://github.com/jumadi59/perpus-py/blob/main/Flowchart.md)
+
+### Install
+```
+pip install pandas
+pip install pwinput
+```
 
 ### Penjelasan
 

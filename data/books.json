@@ -1,0 +1,35 @@
+[
+    {
+      "id": 1,
+      "code": "AJKSGNAS11",
+      "title": "Python Programming",
+      "author": "John Smith",
+      "isbn": "978-1-23456-789-0",
+      "available": true
+    },
+    {
+      "id": 2,
+      "code": "MSCV99SS1S",
+      "title": "Introduction to Machine Learning",
+      "author": "Alice Johnson",
+      "isbn": "978-1-23456-790-6",
+      "available": false
+    },
+    {
+      "id": 3,
+      "code": "BMS31NME01",
+      "title": "Data Structures and Algorithms",
+      "author": "David Brown",
+      "isbn": "978-1-23456-791-3",
+      "available": true
+    },
+    {
+      "id": 4,
+      "code": "SJKSMNAS10",
+      "title": "Java Programming",
+      "author": "John Smith",
+      "isbn": "978-1-23456-789-0",
+      "available": true
+    }
+  ]
+  

@@ -113,18 +113,22 @@ def register():
     username = input('''     [-] username : ''')
     password = pwinput('''     [-] password : ''')
     nim = input('''     [-] NIM : ''')
-
     print('''    ╚════════════════════════════════╝''')
-    util.addData("data/users.json", {
-        "username": username,
-        "password": password,
-        "nim": nim
-    })
-    print('''
-    ╔══════════════════════╗ [-] berhasil membuat akun
-    ║  registrasi berhasil ║ [-] anda dapat login menggukanan akun yang telah didaftarkan''')
-    input('''    ╚══════════════════════╝ [-] tekan enter untuk kembali...''')
-    home()
+
+    if util.getData("data/users.json", "nim", nim) == None:
+        util.addData("data/users.json", {
+            "username": username,
+            "password": password,
+            "nim": nim
+        })
+        print('''
+        ╔══════════════════════╗ [-] berhasil membuat akun
+        ║  registrasi berhasil ║ [-] anda dapat login menggukanan akun yang telah didaftarkan''')
+        input('''    ╚══════════════════════╝ [-] tekan enter untuk kembali...''')
+        home()
+    else:
+        print('''    [x] nim yang di input sudah terdaftar !''')
+        backTo(home)
 
 def listBook():
     util.clearScreen()

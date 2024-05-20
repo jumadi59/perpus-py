@@ -1,9 +1,8 @@
 import json
 import os
 from datetime import datetime
-import time
 
-rootPath = "/Users/jumadi/kuliah/apps/perpustakaan/"
+rootPath = os.getcwd() + "/"
 
 def incrementId(fileName):
     increment = openData("data/increment.json")
@@ -47,6 +46,13 @@ def updateData(fileName, item):
     filePath = rootPath + fileName
     with open(filePath, "w") as file:
         json.dump(update, file)
+
+def getData(fileName, key, value):
+    items = openData(fileName)
+    for item in items:
+        if item[key] == value:
+            return item
+    return None
 
 
 def removeData(fileName, item):

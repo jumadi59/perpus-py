@@ -24,6 +24,12 @@ graph TD
     G --> O[Pinjam Buku]
     G --> P[Kembalikan buku]
     G --> D[Keluar]
+
+    M --> R[Input nama buku]
+    R --> S{Proses cari Buku}
+    S -->|Ada| T[Tampil buku yang di cari] 
+    S -->|tidak Ada| U[kembali cari buku]
+    U --> M
     
     End(End)
     D --> End

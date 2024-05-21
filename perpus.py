@@ -63,8 +63,7 @@ def login():
     if isLogin: menu()
     else: 
         print('''    [x] username / password anda salah !''')
-        backTo(home)
-            
+        backTo(home)           
 
 def menu():
     util.clearScreen()
@@ -256,6 +255,10 @@ def kembalikanBuku():
         print('''╔═''', '''═'''*105,'''═╗''', sep= "")
         print(" "*42, "Daftar Pinjam")
         print('''╚═''', '''═'''*105, '''═╝''', sep="")
+        if len(data) > 0:
+            print(lisPeminjam)
+        else:
+            print(" "*44, "Empty Data")
 
         print("")
         kodeBuku = input('''[-] masukan kode buku          : ''')

@@ -1,6 +1,7 @@
 import sys
 import util
 import datetime
+import hashlib
 import pandas as pd
 from pwinput import pwinput 
 
@@ -49,8 +50,12 @@ def login():
     users = util.openData("data/users.json")
     isLogin = False
 
+
+    md5Hash = hashlib.md5()
+    md5Hash.update(str(password).encode('utf-8'))
+
     for user in users:
-        if user["username"] == username and user["password"] == password:
+        if user["username"] == username and user["password"] == md5Hash.hexdigest():
             userLogin = user["username"]
             isLogin = True
             break
@@ -110,15 +115,18 @@ def register():
     ║  registrasi ║ pastikan kamu sudah benar dalam memasukan input
     ╚═════════════╝ silahkan cek terlebih dahulu sebelum lanjut ^ ^!''')
     print('''    ╔════════════════════════════════╗''')
-    username = input('''     [-] username : ''')
+    username =   input('''     [-] username : ''')
     password = pwinput('''     [-] password : ''')
-    nim = input('''     [-] NIM : ''')
+    nim =        input('''     [-] NIM      : ''')
     print('''    ╚════════════════════════════════╝''')
+
+    md2Hash = hashlib.md5()
+    md2Hash.update(str(password).encode('utf-8'))
 
     if util.getData("data/users.json", "nim", nim) == None:
         util.addData("data/users.json", {
             "username": username,
-            "password": password,
+            "password": md2Hash.hexdigest(),
             "nim": nim
         })
         print('''

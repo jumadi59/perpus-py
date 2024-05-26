@@ -2,11 +2,14 @@ import sys
 import util
 import datetime
 import hashlib
+import cetak
 import pandas as pd
 from pwinput import pwinput 
 
 userLogin = ""
 dendaPerHari = 5000
+maxMeminjam = 5
+
 
 def getUser(username):
     users = util.openData("data/users.json")
@@ -69,7 +72,7 @@ def menu():
     util.clearScreen()
     timeLogin = datetime.date.today()
     books = util.openData("data/books.json")
-    print('''    [⛑ ] username        : ''' , getUser(userLogin)["username"] ,
+    print('''    [⛑ ] admin           : ''' , getUser(userLogin)["username"] ,
           ''' \n    [🛡 ] masuk pada      : ''', timeLogin,
           ''' \n    [🛠 ] total buku      : ''', len(books))
     option = input(''' 
@@ -86,8 +89,8 @@ def menu():
     [-] pilih menu selection diatas [1/2/3/4/5/0] 
         input : ''')
     
-    if option == "1": listBook()
-    elif option == "2": searchBook()
+    if option == "1": daftarBuku()
+    elif option == "2": cariBuku()
     elif option == "3": daftarPinjam()
     elif option == "4": 
         if getUser(userLogin)["username"] == "Tamu":
@@ -137,29 +140,28 @@ def register():
         print('''    [x] nim yang di input sudah terdaftar !''')
         backTo(home)
 
-def listBook():
+def daftarBuku():
     util.clearScreen()
     books = util.openData("data/books.json")
     format = {
         "Code": util.getItemList(books, "code"),
         "Title": util.getItemList(books, "title"),
         "Author": util.getItemList(books, "author"),
-        "ISBN": util.getItemList(books, "isbn"),
-        "Available": util.getItemList(books, "available")
+        "ISBN": util.getItemList(books, "isbn")
     }
-    listBooks = pd.DataFrame(format)
-    listBooks.index = range(1, len(listBooks) + 1)
+    daftarBukus = pd.DataFrame(format)
+    daftarBukus.index = range(1, len(daftarBukus) + 1)
 
 
     print('''╔═''', '''═'''*100,'''═╗''', sep= "")
     print(" "*42, "Daftar Buku")
     print('''╚═''', '''═'''*100, '''═╝''', sep="")
 
-    print(listBooks)
+    print(daftarBukus)
     backTo(menu)
 
 
-def searchBook():
+def cariBuku():
     util.clearScreen()
     search = input("'    [?] cari buku berdasrakan judul : ")
     books = util.openData("data/books.json")
@@ -178,19 +180,18 @@ def searchBook():
             print(f'''\t [-] ISBN            : {result['isbn']}''')
 
         print('''+-----------------------------------------------------------------+''')
-        propYesNo("apakah anda ingin mencari buku yang lain", searchBook, menu)
+        propYesNo("apakah anda ingin mencari buku yang lain", cariBuku, menu)
     else: 
         print(''' 
     ╔═════════════╗ buku yang dicari tidak ditemukan
     ║ input salah ║ coba lagi dengan judul yang tepat ..^ ^! 
     ╚═════════════╝ ''')
-        propYesNo("apakah anda ingin mencari buku yang lain", searchBook, menu)
+        propYesNo("apakah anda ingin mencari buku yang lain", cariBuku, menu)
 
 def pinjamBuku():
     util.clearScreen()
-    print('''+------------------ pinjam ------------------+''')
-    bookCode = input('''[#] kode buku       : ''')
-    print('''+--------------------------------------------+''')
+    print('''+------------------------------ pinjam --------------------------+''')
+    bookCode = input('''\t [#] kode buku       : ''')
 
     user = getUser(userLogin)
     books = util.openData("data/books.json")
@@ -200,22 +201,28 @@ def pinjamBuku():
             result = book
             break
     if len(result) > 0:
+        print('''+-----------------------------------------------------------------+''')
+        print(f'''\t [-] Judul           : {result['title']}''')
+        print(f'''\t [-] Penerbit        : {result['author']}''')
+        print(f'''\t [-] ISBN            : {result['isbn']}''')
+        print('''+-----------------------------------------------------------------+''')
+
         tglPinjam = datetime.date.today().strftime("%d-%m-%Y")
-        print('''[-] nim                        :''', user["nim"])
-        print('''[-] nama peminjam              :''', user["username"])
-        print('''[-] tanggal pinjam             :''',  tglPinjam)
-        tglPengemablian =input("[-] tanggal pengemablian (dd-MM-yyyy) : ")
+        nimPeminjam     = input('''[-] nim                                     : ''')
+        namaPeminjam    = input('''[-] nama peminjam                           : ''')
+        tglPinjam       = input('''[-] tanggal pinjam (dd-MM-yyyy)             : ''') 
+        tglPengemablian = input('''[-] tanggal harus dikembalikan (dd-MM-yyyy) : ''')
 
         util.addData("data/peminjam.json", {
-            "nim": user["nim"],
-            "name": user["username"],
+            "nim": nimPeminjam,
+            "name": namaPeminjam,
             "code_book": result["code"],
             "title_book": result["title"],
             "tgl_pinjam": tglPinjam,
             "tgl_pengembalian": tglPengemablian
         })
         print("[#] data berhasil ditambahkan!")
-        backTo(menu)
+        propYesNo("apakah anda ingin meminjam buku yang lain", pinjamBuku, menu)
 
     else:
         print(''' 
@@ -226,12 +233,16 @@ def pinjamBuku():
 
 def kembalikanBuku():
     util.clearScreen()
-    user = getUser(userLogin)
 
     peminjam = util.openData("data/peminjam.json")
+
+    print('''+-------------- kembalikan buku -------------+''')
+    nimPeminjam = input('''[#] NIM peminjam       : ''')
+    print('''+--------------------------------------------+''')
+
     data = []
     for p in peminjam:
-        if(p["name"] == user["username"]):
+        if(p["nim"] == nimPeminjam):
             telatHari = util.hitungTelatBayar(p["tgl_pengembalian"])
             p["telat"] = str(telatHari) + " Hari"
             p["denda"] = util.formatrupiah(telatHari * dendaPerHari)
@@ -269,27 +280,58 @@ def kembalikanBuku():
                 break
         if len(result) > 0:
             telatHari = util.hitungTelatBayar(result["tgl_pengembalian"])
+            
 
             print('''[#] ID peminjam                : ''', result["id"])
             print('''[-] nim                        :''', result["nim"])
             print('''[-] nama peminjam              :''', result["name"])
             print('''[-] tanggal pinjam             :''', result["tgl_pinjam"])
-            print('''[-] tanggal pengemablian       :''', result["tgl_pengembalian"])
+            tglPengemablian = input('''[-] tanggal pengemablian (dd-MM-yyyy) : ''')
+            itemCetak = {
+                            "kode_buku": result["code_book"],
+                            "tgl_pinjam": result["tgl_pinjam"],
+                            "tgl_hrs_kembali": str(tglPengemablian),
+                            "tgl_pengembalian": result["tgl_pengembalian"],
+                            "denda": "-",
+                            "jumlah": "-",
+                            "keterangan": "",
+                    }
+
             if telatHari > 0:
                 print('''[-] Telat                      :''', str(telatHari), "Hari")
                 print('''[-] Denda Perhari              :''', util.formatrupiah(dendaPerHari))
                 print('''[-] Denda                      :''', util.formatrupiah(telatHari * dendaPerHari))
                 uangBayar = input('''[-] Uang Bayar                 : ''')
                 uangKembalian = int(uangBayar) - (telatHari * dendaPerHari)
+                
+                itemCetak["jumlah"] = str(telatHari) + " Hari"
+                itemCetak["denda"] = util.formatrupiah(telatHari * dendaPerHari)
+            
                 if(uangKembalian < 0):
                     print("[?] Nominal bayar terlalu kecil ")
                 else:
                     print("[-] Uang Kembali              :", util.formatrupiah(uangKembalian))
 
-        util.removeData("data/peminjam.json", result)
-        print("")
-        print("[#] buku berhasil dikembalikan!")
-        backTo(menu)
+            kodePinjam = nimPeminjam.zfill(12)
+            util.removeData("data/peminjam.json", result)
+            print("")
+            print("[#] buku berhasil dikembalikan!")
+            file = cetak.cetakBukti(f"bukti_{nimPeminjam}", {
+                    "nama_peminjam": "Jumadi Janjaya",
+                    "nim": nimPeminjam,
+                    "kode_pinjam": kodePinjam,
+                    "data_list": [itemCetak]
+            })
+            util.openBrowser(file)
+
+            backTo(menu)
+        else:
+            print(''' 
+        ╔═════════════╗ 
+        ║    Perpus   ║ Kode buku yang dipinjamkan tidak ditemukan, 
+        ╚═════════════╝ coba lagi dengan kode buku yang tepat ..^ ^! ''')
+            propYesNo("apakah anda ingin mengembaliakn buku yang lain", kembalikanBuku, menu)
+
     else:
         print(''' 
     ╔═════════════╗ 

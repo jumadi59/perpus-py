@@ -1,6 +1,7 @@
 import json
 import os
 from datetime import datetime
+import webbrowser
 
 rootPath = os.getcwd() + "/"
 
@@ -87,3 +88,10 @@ def hitungTelatBayar(tglPengembalian):
     dtTelat = (dtNow - dtPengembalian).days
     if dtTelat > 0: return dtTelat 
     else: return 0
+
+def openBrowser(fileName):
+    try:
+        webbrowser.open(f'file://{ os.getcwd()}/{fileName}')
+        print("Opening receipt in web browser.")
+    except Exception as e:
+        print(f"Failed to open receipt in web browser: {e}")

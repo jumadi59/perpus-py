@@ -4,6 +4,9 @@ import datetime
 
 def cetakBukti(name, data):
     template = openTamplate("data/template.html")
+    
+    data["nama_perpus"] = "Perpustakan Ada Ada aja Yeeeeee"
+
     template = typeObject(template, data)
     filename = f"bukti/{name}_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.html"
     saveFile(filename, template)

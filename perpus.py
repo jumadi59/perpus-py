@@ -11,6 +11,7 @@ dendaPerHari = 5000
 maxMeminjam = 5
 
 
+# Test push git
 def getUser(username):
     users = util.openData("data/users.json")
     for user in users:

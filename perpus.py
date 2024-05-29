@@ -318,7 +318,7 @@ def kembalikanBuku():
             print("")
             print("[#] buku berhasil dikembalikan!")
             file = cetak.cetakBukti(f"bukti_{nimPeminjam}", {
-                    "nama_peminjam": "Jumadi Janjaya",
+                    "nama_peminjam": result["name"],
                     "nim": nimPeminjam,
                     "kode_pinjam": kodePinjam,
                     "data_list": [itemCetak]

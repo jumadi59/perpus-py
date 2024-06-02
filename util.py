@@ -55,6 +55,9 @@ def getData(fileName, key, value):
             return item
     return None
 
+def getDataLast(filename):
+    list = openData(filename)
+    return list.pop()
 
 def removeData(fileName, item):
     data = openData(fileName)

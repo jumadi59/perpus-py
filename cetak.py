@@ -9,10 +9,13 @@ def cetakBukti(name, data):
 
     template = typeObject(template, data)
     filename = f"bukti/{name}_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.html"
+    #print(template)
     saveFile(filename, template)
     return filename
 
 def typeObject(template, data):
+    template = typeIfElse(template, data)
+
     for key, value in data.items():
         if type(value) is list:
             template = typeList(template, key, value)
@@ -37,8 +40,22 @@ def typeList(template, key, list):
         
     return tmpStart + tmp2 + tmpEnd
 
-def typeBoolean(template, key, bool):
+def typeIfElse(template, data): 
+    pattern = r'\{if:start ([a-zA-Z0-9!_><= \']+)\}(.+?)\{if:end\}'
+    matches = re.findall(pattern, template, re.DOTALL)
+
+    tmp2 = template
+    for match in matches:
+        key = match[0]
+        value = match[1]
+        m = re.search(r'!=|==|>=|<=|>|<', key)
+        s = key.split(m.group())
+        if data[s[0].replace(" ", "")] != None:
+            dV = s[0].replace(" ", "")
+        print(key)
+    
     return template
+
 
 def openTamplate(fileName) :
     path = os.getcwd() + "/" + fileName
@@ -58,6 +75,9 @@ data = {
     "nama_peminjam": "Jumadi Janjaya",
     "nim": "17235050",
     "kode_pinjam": "LTEW9GWRFT",
+    "total_denda": "Rp 10.000",
+    "total_bayar": "Rp 10.000",
+    "total_kembalian": "Rp 0",
     "data_list": [
         {
             "kode_buku": "LTEW9GWRFT",
@@ -88,3 +108,5 @@ data = {
         }
     ]
 }
+
+#cetakBukti("test", data)

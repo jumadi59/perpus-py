@@ -8,7 +8,7 @@ from pwinput import pwinput
 
 userLogin = ""
 dendaPerHari = 5000
-maxMeminjam = 5
+maxMeminjam = 7
 
 
 # Test push git
@@ -118,9 +118,10 @@ def register():
     ║  registrasi ║ pastikan kamu sudah benar dalam memasukan input
     ╚═════════════╝ silahkan cek terlebih dahulu sebelum lanjut ^ ^!''')
     print('''    ╔════════════════════════════════╗''')
-    username =   input('''     [-] username : ''')
-    password = pwinput('''     [-] password : ''')
-    nim =        input('''     [-] NIM      : ''')
+    username =   input('''     [-] username             : ''')
+    password = pwinput('''     [-] password             : ''')
+    nim =        input('''     [-] NIM                  : ''')
+    role =       input('''     [-] Role(Admin/petugas)  : ''')
     print('''    ╚════════════════════════════════╝''')
 
     md2Hash = hashlib.md5()
@@ -130,7 +131,8 @@ def register():
         util.addData("data/users.json", {
             "username": username,
             "password": md2Hash.hexdigest(),
-            "nim": nim
+            "nim": nim,
+            "role": role.lower()
         })
         print('''
         ╔══════════════════════╗ [-] berhasil membuat akun
@@ -194,7 +196,6 @@ def pinjamBuku():
     print('''+------------------------------ pinjam --------------------------+''')
     bookCode = input('''\t [#] kode buku       : ''')
 
-    user = getUser(userLogin)
     books = util.openData("data/books.json")
     result = []
     for book in books:
@@ -208,19 +209,31 @@ def pinjamBuku():
         print(f'''\t [-] ISBN            : {result['isbn']}''')
         print('''+-----------------------------------------------------------------+''')
 
+
         tglPinjam = datetime.date.today().strftime("%d-%m-%Y")
         nimPeminjam     = input('''[-] nim                                     : ''')
+
+        kodePinjam = f'{nimPeminjam}{datetime.datetime.now().strftime("%Y%m%d")}'.zfill(12)
+
+        print('''[-] kode pinjam                             :''', kodePinjam)
+
         namaPeminjam    = input('''[-] nama peminjam                           : ''')
-        tglPinjam       = input('''[-] tanggal pinjam (dd-MM-yyyy)             : ''') 
-        tglPengemablian = input('''[-] tanggal harus dikembalikan (dd-MM-yyyy) : ''')
+        tglPinjam       = input('''[-] tanggal pinjam (dd-MM-yyyy)             : ''')
+        tglPinjam2 = datetime.datetime.strptime(str(tglPinjam), "%d-%m-%Y")
+
+        dateTimeHrsKembali = tglPinjam2 + datetime.timedelta(days = maxMeminjam)
+        tglHrsKembali = dateTimeHrsKembali.strftime("%d-%m-%Y")
+        print(f'[-] tanggal harus dikembalikan (dd-MM-yyyy) : {maxMeminjam} Hari ({tglHrsKembali})')
+
 
         util.addData("data/peminjam.json", {
+            "code_pinjam": kodePinjam, 
             "nim": nimPeminjam,
             "name": namaPeminjam,
             "code_book": result["code"],
             "title_book": result["title"],
             "tgl_pinjam": tglPinjam,
-            "tgl_pengembalian": tglPengemablian
+            "tgl_pengembalian": tglHrsKembali
         })
         print("[#] data berhasil ditambahkan!")
         propYesNo("apakah anda ingin meminjam buku yang lain", pinjamBuku, menu)
@@ -241,7 +254,7 @@ def kembalikanBuku():
     nimPeminjam = input('''[#] NIM peminjam       : ''')
     print('''+--------------------------------------------+''')
 
-    data = []
+    data = [] ## cari buku berdasakan nim
     for p in peminjam:
         if(p["nim"] == nimPeminjam):
             telatHari = util.hitungTelatBayar(p["tgl_pengembalian"])
@@ -251,6 +264,7 @@ def kembalikanBuku():
 
     if len(data) > 0:
         format = {
+            "Kode Pinjam": util.getItemList(data, "code_pinjam"),
             "Peminjam": util.getItemList(data, "name"),
             "NIM": util.getItemList(data, "nim"),
             "Kode Buku": util.getItemList(data, "code_book"),
@@ -273,55 +287,74 @@ def kembalikanBuku():
             print(" "*44, "Empty Data")
 
         print("")
-        kodeBuku = input('''[-] masukan kode buku          : ''')
-        result = []
-        for book in peminjam:
-            if book["code_book"] == str(kodeBuku):
-                result = book
-                break
-        if len(result) > 0:
-            telatHari = util.hitungTelatBayar(result["tgl_pengembalian"])
-            
 
-            print('''[#] ID peminjam                : ''', result["id"])
-            print('''[-] nim                        :''', result["nim"])
-            print('''[-] nama peminjam              :''', result["name"])
-            print('''[-] tanggal pinjam             :''', result["tgl_pinjam"])
-            tglPengemablian = input('''[-] tanggal pengemablian (dd-MM-yyyy) : ''')
-            itemCetak = {
-                            "kode_buku": result["code_book"],
-                            "tgl_pinjam": result["tgl_pinjam"],
-                            "tgl_hrs_kembali": str(tglPengemablian),
-                            "tgl_pengembalian": result["tgl_pengembalian"],
-                            "denda": "-",
-                            "jumlah": "-",
-                            "keterangan": "",
-                    }
+        cariKode = input('''[-] masukan kode buku atau kode pinjam          : ''')
+        results = [] ## cari buku berdasarkan kode buku atau kode pinjam
+        for book in data:
+            if book["code_book"] == str(cariKode) or book["code_pinjam"] == str(cariKode):
+                results.append(book)
 
-            if telatHari > 0:
-                print('''[-] Telat                      :''', str(telatHari), "Hari")
-                print('''[-] Denda Perhari              :''', util.formatrupiah(dendaPerHari))
-                print('''[-] Denda                      :''', util.formatrupiah(telatHari * dendaPerHari))
-                uangBayar = input('''[-] Uang Bayar                 : ''')
-                uangKembalian = int(uangBayar) - (telatHari * dendaPerHari)
+        if len(results) > 0:
+            cetakList =[]
+            totalDenda = 0
+            uangBayar = 0
+            uangKembalian = 0
+
+            print('''+-----------------------------------------------------------------+''')
+            for result in results:
+                print('''[#] ID peminjam                   :''', result["id"])
+                print('''[-] nim peminjam                  :''', result["nim"])
+                print('''[-] nama peminjam                 :''', result["name"])
+                print('''[-] tanggal pinjam                :''', result["tgl_pinjam"])
+                print('''[-] tanggal hrs kembalian         :''', result["tgl_pengembalian"])
+
+                tglPengemablian = input('''[-] tgl pengemablian (dd-MM-yyyy) : ''', )
+                keterangan = input("[-] keterangan                     : ")
+                itemCetak = {
+                    "kode_buku": result["code_book"],
+                    "tgl_pinjam": result["tgl_pinjam"],
+                    "tgl_hrs_kembali": str(tglPengemablian),
+                    "tgl_pengembalian": result["tgl_pengembalian"],
+                    "denda": "-",
+                    "jumlah": "-",
+                    "keterangan": str(keterangan),
+                }
+                telatHari = util.hitungTelatBayar(result["tgl_pengembalian"])
+                denda = telatHari * dendaPerHari
+                totalDenda += denda
+
+                if telatHari > 0:
+                    print('''[-] Telat                          :''', str(telatHari), "Hari")
+                    print('''[-] Denda Perhari                  :''', util.formatrupiah(dendaPerHari))
+                    print('''[-] Denda                      :''', util.formatrupiah(denda))
+                    itemCetak["jumlah"] = str(telatHari) + " Hari"
+                    itemCetak["denda"] = util.formatrupiah(denda)
                 
-                itemCetak["jumlah"] = str(telatHari) + " Hari"
-                itemCetak["denda"] = util.formatrupiah(telatHari * dendaPerHari)
-            
+                cetakList.append(itemCetak)
+                print('''+-----------------------------------------------------------------+''')
+
+            if totalDenda > 0:
+                print('''[-] Total Bayar                    :''', util.formatrupiah(totalDenda))
+                uangBayar = int(input('''[-] Uang Bayar                     : '''))
+                uangKembalian = uangBayar - totalDenda
                 if(uangKembalian < 0):
                     print("[?] Nominal bayar terlalu kecil ")
                 else:
                     print("[-] Uang Kembali              :", util.formatrupiah(uangKembalian))
 
-            kodePinjam = nimPeminjam.zfill(12)
+            kodePinjam = results[0]["code_pinjam"]
+            namaPeminjam = results[0]["name"]
             util.removeData("data/peminjam.json", result)
             print("")
             print("[#] buku berhasil dikembalikan!")
             file = cetak.cetakBukti(f"bukti_{nimPeminjam}", {
-                    "nama_peminjam": result["name"],
+                    "nama_peminjam": namaPeminjam,
                     "nim": nimPeminjam,
                     "kode_pinjam": kodePinjam,
-                    "data_list": [itemCetak]
+                    "data_list": cetakList,
+                    "total_denda": util.formatrupiah(telatHari * dendaPerHari),
+                    "total_bayar": util.formatrupiah(uangBayar),
+                    "total_kembalian": util.formatrupiah(uangKembalian)
             })
             util.openBrowser(file)
 
@@ -352,12 +385,13 @@ def daftarPinjam():
         data.append(p)
 
     format = {
+        "Kode Pinjam": util.getItemList(data, "code_pinjam"),
         "peminjam": util.getItemList(data, "name"),
         "NIM": util.getItemList(data, "nim"),
         "Kode Buku": util.getItemList(data, "code_book"),
         "Judul buku": util.getItemList(data, "title_book"),
         "Tanggal Pinjam": util.getItemList(data, "tgl_pinjam"),
-        "Tanggal Pengembalian": util.getItemList(data, "tgl_pengembalian"),
+        "Tanggal Hrs Kembali": util.getItemList(data, "tgl_pengembalian"),
         "Telat": util.getItemList(data, "telat"),
         "Denda": util.getItemList(data, "denda")
     }

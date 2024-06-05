@@ -96,12 +96,10 @@ def hitungTelatBayar(tglPengembalian):
 def hitungTelatBayar2(tglHrsKembali, gtlDikembali):
     dtHrsKembali = datetime.strptime(tglHrsKembali, "%d-%m-%Y")
     dtKembali = datetime.strptime(gtlDikembali, "%d-%m-%Y")
-    if dtKembali < dtHrsKembali:
+    if dtHrsKembali > dtKembali:
         return 0
     else:
-        dtTelat = (dtKembali - tglHrsKembali).days
-        if dtTelat > 0: return dtTelat 
-        else: return 0
+        return (dtKembali - dtHrsKembali).days
 
 def openBrowser(fileName):
     try:
@@ -111,4 +109,4 @@ def openBrowser(fileName):
         print(f"Failed to open receipt in web browser: {e}")
 
 
-##print(hitungTelatBayar2("07-05-2024", "06-05-2024"))
+print(hitungTelatBayar2("05-05-2024", "10-05-2024"))

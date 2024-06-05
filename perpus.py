@@ -271,8 +271,8 @@ def kembalikanBuku():
             "Judul buku": util.getItemList(data, "title_book"),
             "Tanggal Pinjam": util.getItemList(data, "tgl_pinjam"),
             "Tanggal Pengembalian": util.getItemList(data, "tgl_pengembalian"),
-            "Telat": util.getItemList(data, "telat"),
-            "Denda": util.getItemList(data, "denda")
+            #"Telat": util.getItemList(data, "telat"),
+            #"Denda": util.getItemList(data, "denda")
         }
         lisPeminjam = pd.DataFrame(format)
         lisPeminjam.index = range(1, len(lisPeminjam) + 1)
@@ -319,7 +319,7 @@ def kembalikanBuku():
                     "jumlah": "-",
                     "keterangan": str(keterangan),
                 }
-                telatHari = util.hitungTelatBayar(result["tgl_pengembalian"])
+                telatHari = util.hitungTelatBayar2(result["tgl_pengembalian"], result["tgl_pinjam"])
                 denda = telatHari * dendaPerHari
                 totalDenda += denda
 
@@ -392,8 +392,8 @@ def daftarPinjam():
         "Judul buku": util.getItemList(data, "title_book"),
         "Tanggal Pinjam": util.getItemList(data, "tgl_pinjam"),
         "Tanggal Hrs Kembali": util.getItemList(data, "tgl_pengembalian"),
-        "Telat": util.getItemList(data, "telat"),
-        "Denda": util.getItemList(data, "denda")
+        #"Telat": util.getItemList(data, "telat"),
+        #"Denda": util.getItemList(data, "denda")
     }
     lisPeminjam = pd.DataFrame(format)
     lisPeminjam.index = range(1, len(lisPeminjam) + 1)

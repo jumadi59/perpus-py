@@ -92,9 +92,23 @@ def hitungTelatBayar(tglPengembalian):
     if dtTelat > 0: return dtTelat 
     else: return 0
 
+
+def hitungTelatBayar2(tglHrsKembali, gtlDikembali):
+    dtHrsKembali = datetime.strptime(tglHrsKembali, "%d-%m-%Y")
+    dtKembali = datetime.strptime(gtlDikembali, "%d-%m-%Y")
+    if dtKembali < dtHrsKembali:
+        return 0
+    else:
+        dtTelat = (dtHrsKembali - dtKembali).days
+        if dtTelat > 0: return dtTelat 
+        else: return 0
+
 def openBrowser(fileName):
     try:
         webbrowser.open(f'file://{ os.getcwd()}/{fileName}')
         print("Opening receipt in web browser.")
     except Exception as e:
         print(f"Failed to open receipt in web browser: {e}")
+
+
+##print(hitungTelatBayar2("07-05-2024", "06-05-2024"))

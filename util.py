@@ -99,7 +99,7 @@ def hitungTelatBayar2(tglHrsKembali, gtlDikembali):
     if dtKembali < dtHrsKembali:
         return 0
     else:
-        dtTelat = (dtHrsKembali - dtKembali).days
+        dtTelat = (dtKembali - tglHrsKembali).days
         if dtTelat > 0: return dtTelat 
         else: return 0
 

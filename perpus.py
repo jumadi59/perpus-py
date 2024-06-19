@@ -313,13 +313,13 @@ def kembalikanBuku():
                 itemCetak = {
                     "kode_buku": result["code_book"],
                     "tgl_pinjam": result["tgl_pinjam"],
-                    "tgl_hrs_kembali": str(tglPengemablian),
-                    "tgl_pengembalian": result["tgl_pengembalian"],
+                    "tgl_hrs_kembali": result["tgl_pengembalian"],
+                    "tgl_pengembalian": str(tglPengemablian),
                     "denda": "-",
                     "jumlah": "-",
                     "keterangan": str(keterangan),
                 }
-                telatHari = util.hitungTelatBayar2(result["tgl_pengembalian"], result["tgl_pinjam"])
+                telatHari = util.hitungTelatBayar2(result["tgl_pengembalian"], str(tglPengemablian))
                 denda = telatHari * dendaPerHari
                 totalDenda += denda
 

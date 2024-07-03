@@ -124,10 +124,10 @@ def register():
     role =       input('''     [-] Role(Admin/petugas)  : ''')
     print('''    ╚════════════════════════════════╝''')
 
-    md2Hash = hashlib.md5()
-    md2Hash.update(str(password).encode('utf-8'))
+    md2Hash = hashlib.md5() # memanggil libary MD5
+    md2Hash.update(str(password).encode('utf-8')) # enkrip password menggunakan metode MD5
 
-    if util.getData("data/users.json", "nim", nim) == None:
+    if util.getData("data/users.json", "nim", nim) == None: # melakukan validasi jika nim belum terdaftar
         util.addData("data/users.json", {
             "username": username,
             "password": md2Hash.hexdigest(),
@@ -339,6 +339,8 @@ def kembalikanBuku():
                 uangKembalian = uangBayar - totalDenda
                 if(uangKembalian < 0):
                     print("[?] Nominal bayar terlalu kecil ")
+                    backTo(menu)
+                    return
                 else:
                     print("[-] Uang Kembali              :", util.formatrupiah(uangKembalian))
 
